@@ -47,3 +47,46 @@ export async function createRoom(location: { lat: number, lng: number } | null) 
 
     redirect(`/room/${roomCode}`)
 }
+
+export async function joinRoom(roomCode: string) {
+    const supabase = await createClient()
+
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: 'You must be signed in to join a room.' }
+    }
+
+    // Find room
+    const { data: room, error: roomError } = await supabase
+        .from('rooms')
+        .select('id, status')
+        .eq('room_code', roomCode)
+        .single()
+
+    if (roomError || !room) {
+        return { error: 'Room not found' }
+    }
+
+    if (room.status !== 'waiting') {
+        return { error: 'Room is already in session or ended' }
+    }
+
+    // Add participant
+    const { error: participantError } = await supabase
+        .from('participants')
+        .insert({
+            room_id: room.id,
+            user_id: user.id
+        })
+        .select() // Verify insertion
+
+    // Ignore unique constraint error if user already joined
+    if (participantError && participantError.code !== '23505') {
+        console.error('Error joining room:', participantError)
+        return { error: 'Failed to join room' }
+    }
+
+    redirect(`/room/${roomCode}`)
+}

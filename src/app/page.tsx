@@ -2,13 +2,16 @@
 
 import { useState } from 'react'
 import { LocationDetector } from '@/components/LocationDetector'
-import { createRoom } from './actions'
+import { createRoom, joinRoom } from './actions'
 import { createClient } from '@/utils/supabase/client'
 
 export default function Home() {
   const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [username, setUsername] = useState('')
+
+  const [joinCode, setJoinCode] = useState('')
+  const [isJoining, setIsJoining] = useState(false)
 
   const handleCreateRoom = async () => {
     setIsCreating(true)
@@ -30,6 +33,25 @@ export default function Home() {
 
     await createRoom(location)
     setIsCreating(false)
+  }
+
+  const handleJoin = async () => {
+    if (!joinCode) return
+    setIsJoining(true)
+    const supabase = createClient()
+
+    // Ensure auth
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      await supabase.auth.signInAnonymously()
+    }
+
+    // Call server action
+    const result = await joinRoom(joinCode)
+    if (result?.error) {
+      alert(result.error)
+      setIsJoining(false)
+    }
   }
 
   return (
@@ -84,11 +106,17 @@ export default function Home() {
             <input
               type="text"
               placeholder="4-digit Code"
-              className="bg-slate-900 border border-slate-700 rounded-lg p-3 w-full text-center tracking-widest font-mono"
+              className="bg-slate-900 border border-slate-700 rounded-lg p-3 w-full text-center tracking-widest font-mono uppercase"
               maxLength={4}
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value)}
             />
-            <button className="bg-slate-700 hover:bg-slate-600 text-white px-6 rounded-lg font-medium transition-colors">
-              Join
+            <button
+              onClick={handleJoin}
+              disabled={isJoining || !joinCode}
+              className="bg-slate-700 hover:bg-slate-600 text-white px-6 rounded-lg font-medium transition-colors disabled:opacity-50"
+            >
+              {isJoining ? '...' : 'Join'}
             </button>
           </div>
         </div>
