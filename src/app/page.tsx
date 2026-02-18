@@ -31,8 +31,18 @@ export default function Home() {
     // Also update profile if username provided (optional logic for now)
     // await updateProfile(username) 
 
-    await createRoom(location)
-    setIsCreating(false)
+    try {
+      const result = await createRoom(location)
+      if (result?.error) {
+        console.error('Create Room Error:', result.error)
+        alert('Failed to create room: ' + result.error)
+      }
+    } catch (e: any) {
+      console.error('Unexpected error creating room:', e)
+      alert('An unexpected error occurred: ' + e.message)
+    } finally {
+      setIsCreating(false)
+    }
   }
 
   const handleJoin = async () => {
