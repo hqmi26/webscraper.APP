@@ -62,7 +62,7 @@ export async function POST(req: Request) {
                 'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.types,places.primaryType,places.priceLevel,places.rating,places.userRatingCount',
             },
             body: JSON.stringify({
-                includedTypes: ['restaurant', 'food'],
+                includedTypes: ['restaurant', 'cafe', 'bakery', 'bar'],
                 locationRestriction: {
                     circle: {
                         center: { latitude: lat, longitude: lng },
