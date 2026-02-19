@@ -69,7 +69,7 @@ export async function createRoom(location: { lat: number, lng: number } | null, 
         return { error: 'An unexpected error occurred creating the room.' }
     }
 
-    redirect(`/room/${roomCode}`)
+    return { success: true, roomCode }
 }
 
 export async function joinRoom(roomCode: string, username: string = 'Anonymous') {
@@ -126,5 +126,5 @@ export async function joinRoom(roomCode: string, username: string = 'Anonymous')
         return { error: 'Failed to join room' }
     }
 
-    redirect(`/room/${roomCode}`)
+    return { success: true, roomCode }
 }

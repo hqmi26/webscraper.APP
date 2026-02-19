@@ -36,6 +36,9 @@ export default function Home() {
       if (result?.error) {
         console.error('Create Room Error:', result.error)
         alert('Failed to create room: ' + result.error)
+      } else if (result?.success && result.roomCode) {
+        // Client-side redirect to avoid NEXT_REDIRECT error
+        window.location.href = `/room/${result.roomCode}`
       }
     } catch (e: any) {
       console.error('Unexpected error creating room:', e)
@@ -61,6 +64,8 @@ export default function Home() {
     if (result?.error) {
       alert(result.error)
       setIsJoining(false)
+    } else if (result?.success && result.roomCode) {
+      window.location.href = `/room/${result.roomCode}`
     }
   }
 
@@ -71,7 +76,7 @@ export default function Home() {
           <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600 mb-2">
             MakanMatch
           </h1>
-          <p className="text-slate-400">"Anything also can" resolved. <span className="text-xs opacity-50">v1.1</span></p>
+          <p className="text-slate-400">"Anything also can" resolved. <span className="text-xs opacity-50">v1.2</span></p>
         </div>
 
         <div className="bg-slate-800 p-8 rounded-2xl shadow-xl space-y-6 border border-slate-700">
