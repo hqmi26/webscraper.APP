@@ -74,9 +74,16 @@ export async function POST(req: Request) {
         })
 
         const data = await response.json()
-        if (!data.places) {
-            console.error('No places found or API error', data)
-            return NextResponse.json({ error: 'No places found' }, { status: 404 })
+
+        // Check for Google API error
+        if (data.error) {
+            console.error('Google Places API Error:', data.error)
+            return NextResponse.json({ error: `Google API Error: ${data.error.message || data.error.status}` }, { status: data.error.code || 500 })
+        }
+
+        if (!data.places || data.places.length === 0) {
+            console.error('No places found', data)
+            return NextResponse.json({ error: 'No places found in this location.' }, { status: 404 })
         }
 
         let places: Place[] = data.places
