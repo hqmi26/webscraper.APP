@@ -32,7 +32,7 @@ export default function Home() {
     // await updateProfile(username) 
 
     try {
-      const result = await createRoom(location)
+      const result = await createRoom(location, username)
       if (result?.error) {
         console.error('Create Room Error:', result.error)
         alert('Failed to create room: ' + result.error)
@@ -57,7 +57,7 @@ export default function Home() {
     }
 
     // Call server action
-    const result = await joinRoom(joinCode)
+    const result = await joinRoom(joinCode, username)
     if (result?.error) {
       alert(result.error)
       setIsJoining(false)

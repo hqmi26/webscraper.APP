@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
-export async function createRoom(location: { lat: number, lng: number } | null) {
+export async function createRoom(location: { lat: number, lng: number } | null, username: string = 'Anonymous') {
     const supabase = await createClient()
 
     // Get current user
@@ -12,6 +12,22 @@ export async function createRoom(location: { lat: number, lng: number } | null) 
     if (!user) {
         console.error('createRoom: User not signed in')
         return { error: 'You must be signed in to create a room.' }
+    }
+
+    // Ensure profile exists (Upsert)
+    // This fixes the foreign key constraint "rooms_host_id_fkey"
+    const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+            id: user.id,
+            username: username || 'Anonymous',
+            updated_at: new Date().toISOString()
+        })
+
+    if (profileError) {
+        console.error('Error updating profile:', profileError)
+        // We continue? Or fail? Best to fail if we know it will break FK
+        return { error: 'Failed to create user profile: ' + profileError.message }
     }
 
     let roomCode: string
@@ -56,7 +72,7 @@ export async function createRoom(location: { lat: number, lng: number } | null) 
     redirect(`/room/${roomCode}`)
 }
 
-export async function joinRoom(roomCode: string) {
+export async function joinRoom(roomCode: string, username: string = 'Anonymous') {
     const supabase = await createClient()
 
     // Get current user
@@ -64,6 +80,20 @@ export async function joinRoom(roomCode: string) {
 
     if (!user) {
         return { error: 'You must be signed in to join a room.' }
+    }
+
+    // Ensure profile exists for joiner too
+    const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+            id: user.id,
+            username: username || 'Anonymous',
+            updated_at: new Date().toISOString()
+        })
+
+    if (profileError) {
+        console.error('Error updating joiner profile:', profileError)
+        return { error: 'Failed to create user profile: ' + profileError.message }
     }
 
     // Find room
