@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { calculateMatchScore } from '@/utils/matching'
-import { Check, X, Star, Flame, Clock, Heart, SlidersHorizontal, Info, Home, Search, MessageSquare, User } from 'lucide-react'
+import { Check, X, Star, Flame, Clock, Heart, SlidersHorizontal, Info, Home, Search, MessageSquare, User, MapPin } from 'lucide-react'
 
 
 // Define Candidate type based on what we saved
